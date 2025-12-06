@@ -1,3 +1,18 @@
+var meterColors = [
+  '#4caf50',
+  '#ff9800',
+  '#03a9f4',
+  '#e91e63',
+  '#9c27b0',
+  '#8bc34a',
+  '#ffc107',
+  '#00bcd4'
+];
+
+function pickMeterColor(index) {
+  return meterColors[index % meterColors.length];
+}
+
 function createMetersContainer() {
   var container = document.getElementById('cc-meter-container');
   if (!container) {
@@ -5,11 +20,11 @@ function createMetersContainer() {
     container.id = 'cc-meter-container';
     Object.assign(container.style, {
       position: 'fixed',
-      top: '10px',
+      top: '20px',
       right: '10px',
       display: 'flex',
+      flexDirection: 'column',
       gap: '6px',
-      alignItems: 'flex-end',
       padding: '8px',
       background: 'rgba(0, 0, 0, 0.8)',
       border: '1px solid #444',
@@ -20,9 +35,28 @@ function createMetersContainer() {
     });
     document.body.appendChild(container);
 
+    var title = document.createElement('div');
+    title.textContent = 'Midi meters';
+    Object.assign(title.style, {
+      fontSize: '12px',
+      fontWeight: 'bold',
+      color: '#ddd',
+      letterSpacing: '0.5px',
+      userSelect: 'none'
+    });
+    container.appendChild(title);
+
+    var barsWrapper = document.createElement('div');
+    barsWrapper.setAttribute('data-role', 'meters-row');
+    Object.assign(barsWrapper.style, {
+      display: 'flex',
+      gap: '6px',
+      alignItems: 'flex-end'
+    });
+    container.appendChild(barsWrapper);
+
     var rect = container.getBoundingClientRect();
-    container.style.left = window.innerWidth - rect.width - 10 + 'px';
-    container.style.top = '10px';
+    container.style.left = window.innerWidth - 2 * (rect.width - 10) + 'px';
     container.style.right = 'auto';
   }
   return container;
@@ -73,7 +107,23 @@ function enableDrag(element) {
   };
 }
 
+function ensureMetersRow(container) {
+  var row = container.querySelector('[data-role="meters-row"]');
+  if (!row) {
+    row = document.createElement('div');
+    row.setAttribute('data-role', 'meters-row');
+    Object.assign(row.style, {
+      display: 'flex',
+      gap: '6px',
+      alignItems: 'flex-end'
+    });
+    container.appendChild(row);
+  }
+  return row;
+}
+
 function makeBar(id, index, container) {
+  var barsWrapper = ensureMetersRow(container);
   var outer = document.getElementById(id);
   if (!outer) {
     outer = document.createElement('div');
@@ -88,14 +138,14 @@ function makeBar(id, index, container) {
       padding: '2px',
       boxSizing: 'border-box'
     });
-    container.appendChild(outer);
+    barsWrapper.appendChild(outer);
   }
 
   var inner = document.createElement('div');
   Object.assign(inner.style, {
     width: '100%',
     height: '0%',
-    background: '#4caf50',
+    background: pickMeterColor(index),
     transition: 'height 50ms linear'
   });
 
